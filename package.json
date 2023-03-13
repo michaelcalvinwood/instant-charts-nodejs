@@ -10,6 +10,7 @@
   "license": "SEE LICENSE IN license.md",
   "dependencies": {
     "cors": "^2.8.5",
+    "csv-parse": "^5.3.6",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "formidable": "^2.1.1",
