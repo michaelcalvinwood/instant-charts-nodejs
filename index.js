@@ -21,9 +21,10 @@ app.get('/', (req, res) => {
 
 app.post('/csv', (req, res) => {
     var form = new formidable.IncomingForm();
-    form.parse(req, function (err, fields, files) {
+    form.parse(req, function (err, fields, data) {
         if (err) return console.error(err);
-        console.log(files['File[]'].filepath);
+        console.log(data['File[]'].filepath);
+        console.log(fields.chart);
         // const filePath = files.filetoupload.filepath;
         // console.log('files stored in', filePath);
         res.write('File uploaded');
