@@ -8,6 +8,8 @@ const https = require('https');
 const cors = require('cors');
 const fs = require('fs');
 
+const formidable = require('formidable');
+
 const app = express();
 app.use(express.static('public'));
 app.use(express.json({limit: '200mb'})); 
@@ -17,6 +19,17 @@ app.get('/', (req, res) => {
     res.send('Hello, World!');
 });
 
+app.post('/csv', (req, res) => {
+    var form = new formidable.IncomingForm();
+    form.parse(req, function (err, fields, files) {
+        if (err) return console.error(err);
+        console.log(files['File[]'].filepath);
+        // const filePath = files.filetoupload.filepath;
+        // console.log('files stored in', filePath);
+        res.write('File uploaded');
+        res.end();
+    });
+})
 const httpsServer = https.createServer({
     key: fs.readFileSync(privateKeyPath),
     cert: fs.readFileSync(fullchainPath),
