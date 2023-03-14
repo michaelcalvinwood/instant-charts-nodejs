@@ -55,12 +55,9 @@ app.post('/csv', (req, res) => {
                 return console.error(err);
             }
             console.log(records);
+            return res.json(records);
         })
-
-        // const filePath = files.filetoupload.filepath;
-        // console.log('files stored in', filePath);
-        res.write('File uploaded');
-        res.end();
+       
     });
 })
 const httpsServer = https.createServer({
