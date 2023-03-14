@@ -52,10 +52,12 @@ app.post('/csv', (req, res) => {
         csvParse.parse(input, (err, records) => {
             if (err) {
                 res.status(401).json({err});
-                return console.error(err);
+                console.error(err);
             }
             console.log(records);
-            return res.json(records);
+            res.json(records);
+
+            fs.unlinkSync(fileName);
         })
        
     });
