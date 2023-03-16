@@ -32,6 +32,7 @@ const pool = mysql.createPool(config);
 //     console.log(rows);
 // })
 
+
 const app = express();
 app.use(express.static('public'));
 app.use(express.json({limit: '200mb'})); 
@@ -58,10 +59,26 @@ app.post('/csv', (req, res) => {
             res.json(records);
 
             fs.unlinkSync(fileName);
-        })
+        });
        
     });
+});
+
+app.post('/id/:id', (req, res) => {
+    const id = req.params;
+    const {title, subtitle, meta, option} = req.body;
+    if (typeof title === 'undefined') return res.status(401).json('missing title');
+    if (typeof subtitle === 'undefined') return res.status(401).json('missing subtitle');
+    if (typeof meta === 'undefined') return res.status(401).json('missing meta');
+    if (typeof option === 'undefined') return res.status(401).json('missing option');
+
+    const query = `INSERT INTO charts (id, title, subtitle, meta, option) VALUES ('${id}', '${title}', '${subtitle}', '${meta}', '${option}')`;
+    pool.query(query, function(err, rows, fields) {
+        if (err) return res.status(400).json('database error');
+        res.status(200).json('success');
+    })
 })
+
 const httpsServer = https.createServer({
     key: fs.readFileSync(privateKeyPath),
     cert: fs.readFileSync(fullchainPath),
