@@ -64,8 +64,17 @@ app.post('/csv', (req, res) => {
     });
 });
 
+app.get('/id/:id', (req, res) => {
+    const id = req.params.id;
+    const query = `SELECT option FROM charts WHERE id = '${id}'`;
+    pool.query(query, function(err, rows, fields) {
+        if (err) return res.status(400).json('database error');
+        res.status(200).json(rows[0]);
+    })
+})
+
 app.post('/id/:id', (req, res) => {
-    const id = req.params;
+    const id = req.params.id;
     const {title, subtitle, meta, option} = req.body;
     if (typeof title === 'undefined') return res.status(401).json('missing title');
     if (typeof subtitle === 'undefined') return res.status(401).json('missing subtitle');
@@ -78,6 +87,7 @@ app.post('/id/:id', (req, res) => {
         res.status(200).json('success');
     })
 })
+
 
 const httpsServer = https.createServer({
     key: fs.readFileSync(privateKeyPath),
