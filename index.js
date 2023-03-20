@@ -13,7 +13,7 @@ const mysql = require('mysql2');
 const csvParse = require('csv-parse');
 
 const config = {
- host: '127.0.0.1',
+  host: process.env.MYSQL_HOST,
   user: process.env.MYSQL_USER,
   database: process.env.MYSQL_DATABASE,
   password: process.env.MYSQL_PASSWORD,
@@ -69,21 +69,25 @@ app.get('/id/:id', (req, res) => {
     const query = `SELECT option FROM charts WHERE id = '${id}'`;
     pool.query(query, function(err, rows, fields) {
         if (err) return res.status(400).json('database error');
-        res.status(200).json(rows[0]);
+        res.status(200).send(rows);
     })
 })
 
 app.post('/id/:id', (req, res) => {
     const id = req.params.id;
-    const {title, subtitle, meta, option} = req.body;
+    const {title, subtitle, meta, option, source} = req.body;
     if (typeof title === 'undefined') return res.status(401).json('missing title');
     if (typeof subtitle === 'undefined') return res.status(401).json('missing subtitle');
     if (typeof meta === 'undefined') return res.status(401).json('missing meta');
     if (typeof option === 'undefined') return res.status(401).json('missing option');
+    if (typeof source === 'undefined') return res.status(401).json('missing source');
 
-    const query = `INSERT INTO charts (id, title, subtitle, meta, option) VALUES ('${id}', '${title}', '${subtitle}', '${meta}', '${option}')`;
+    const query = `INSERT INTO charts (id, title, subtitle, meta, source, option) VALUES ('${id}', '${title}', '${subtitle}', '${meta}', '${source}', '${option}')`;
     pool.query(query, function(err, rows, fields) {
-        if (err) return res.status(400).json('database error');
+        if (err) {
+            console.error(err);
+            return res.status(400).json('database error');
+        }
         res.status(200).json('success');
     })
 })
