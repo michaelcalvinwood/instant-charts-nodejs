@@ -63,10 +63,21 @@ app.post('/csv', (req, res) => {
     form.parse(req, function (err, fields, data) {
         if (err) return console.error(err);
         const fileName = data['File[]'].filepath;
-        const chart = fields.chart;
+        
+        let input = fs.readFileSync(fileName, "utf-8");
+        if (!input) return res.status(400).json('no input')
+        
+        input = input.replaceAll("\r\n", "\n");
 
-        const input = fs.readFileSync(fileName, "utf-8");
+        const lines = input.split("\n");
+        if (lines[0] === 'sep=,') {
+            console.log("remove sep");
+            lines.splice(0, 1);
+           input = lines.join("\n");
+        } else console.log('lines[0]', lines[0], lines[0].length)
+
         const delimiter = detectDelimiter(input);
+
         csvParse.parse(input, {delimiter}, (err, records) => {
             if (err) {
                 res.status(401).json({err});
@@ -92,14 +103,12 @@ app.get('/id/:id', (req, res) => {
 
 app.post('/id/:id', (req, res) => {
     const id = req.params.id;
-    const {title, subtitle, meta, option, source} = req.body;
-    if (typeof title === 'undefined') return res.status(401).json('missing title');
-    if (typeof subtitle === 'undefined') return res.status(401).json('missing subtitle');
-    if (typeof meta === 'undefined') return res.status(401).json('missing meta');
+    const {title, subtitle, meta, option} = req.body;
+    console.log('meta', meta);
+    
     if (typeof option === 'undefined') return res.status(401).json('missing option');
-    if (typeof source === 'undefined') return res.status(401).json('missing source');
-
-    const query = `INSERT INTO charts (id, title, subtitle, meta, source, option) VALUES ('${id}', '${title}', '${subtitle}', '${meta}', '${source}', '${option}')`;
+    
+    const query = `INSERT INTO charts (id, option) VALUES ('${id}', ${pool.escape(option)})`;
     pool.query(query, function(err, rows, fields) {
         if (err) {
             console.error(err);
