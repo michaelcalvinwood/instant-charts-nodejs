@@ -11,6 +11,7 @@ const fs = require('fs');
 const formidable = require('formidable');
 const mysql = require('mysql2');
 const csvParse = require('csv-parse');
+const { delimiter } = require('path');
 
 const config = {
   host: process.env.MYSQL_HOST,
@@ -38,6 +39,21 @@ app.use(express.static('public'));
 app.use(express.json({limit: '200mb'})); 
 app.use(cors());
 
+
+const detectDelimiter = (input) => {
+    const lines = input.split("\n");
+    let numPipes = 0;
+    let numCommas = 0;
+    for (let i = 0; i < lines.length; ++i) {
+        numPipes += (lines[i].match(/\|/g) || []).length;
+        numCommas += (lines[i].match(/,/g) || []).length;
+    }
+
+    if (numPipes > numCommas) return '|';
+
+    return ',';
+}
+
 app.get('/', (req, res) => {
     res.send('Hello, World!');
 });
@@ -50,7 +66,8 @@ app.post('/csv', (req, res) => {
         const chart = fields.chart;
 
         const input = fs.readFileSync(fileName, "utf-8");
-        csvParse.parse(input, (err, records) => {
+        const delimiter = detectDelimiter(input);
+        csvParse.parse(input, {delimiter}, (err, records) => {
             if (err) {
                 res.status(401).json({err});
                 console.error(err);
